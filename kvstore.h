@@ -62,6 +62,8 @@ typedef struct kvs_array_item_s {
 int kvstore_array_set(char *key, char *value);
 
 char *kvstore_array_get(char *key);
+int kvstore_array_delete(char *key);
+int kvstore_array_modify(char *key, char *value);
 extern kvs_array_item_t array_table[KVS_ARRAY_SIZE];
 extern int array_idx;
 #endif

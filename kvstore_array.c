@@ -48,9 +48,50 @@ char *kvstore_array_get(char *key) {
   }
   int idx = 0;
   for (idx = 0; idx < array_idx; idx++) {
+    if (array_table[idx].key == NULL) {
+      return NULL; // 如果key为NULL，直接返回NULL
+    }
     if (strcmp(array_table[idx].key, key) == 0) {
       return array_table[idx].value;
     }
   }
   return NULL;
+}
+
+int kvstore_array_delete(char *key) {
+  if (key == NULL) {
+    return -1;
+  }
+  int i = 0;
+  for (i = 0; i < array_idx; i++) {
+    if (strcmp(array_table[i].key, key) == 0) {
+      kvstore_free(array_table[i].value);
+      array_table[i].value = NULL;
+
+      kvstore_free(array_table[i].key);
+      array_table[i].key = NULL;
+      return 0; // 删除成功
+    }
+  }
+  return i; // 返回未找到的索引
+}
+
+int kvstore_array_modify(char *key, char *value) {
+  if (key == NULL || value == NULL) {
+    return -1;
+  }
+  int i = 0;
+  for (i = 0; i < array_idx; i++) {
+    if (strcmp(array_table[i].key, key) == 0) {
+      kvstore_free(array_table[i].value);
+      array_table[i].value = NULL;
+
+      char *vcopy = (char *)kvstore_malloc(strlen(value) + 1);
+      strncpy(vcopy, value, strlen(value) + 1);
+
+      array_table[i].value = vcopy;
+      return 0; // 修改成功
+    }
+  }
+  return i;
 }
