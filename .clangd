@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    - -I/home/czm/NtyCo/core/
+    - -DSPDK_HEADER  # 如果你用了一些宏
