@@ -36,9 +36,31 @@ int kvstore_array_set(char *key, char *value) {
     kvstore_free(vcopy);
     return -1; // Array is full
   }
+#if 0
   array_table[array_idx].key = kcopy;
   array_table[array_idx].value = vcopy;
   array_idx++;
+#endif
+  // 判断前面是否有空位
+  int i = 0;
+  for (i = 0; i < array_idx; i++) {
+    if (array_table[i].key == NULL) {
+      array_table[i].key = kcopy;
+      array_table[i].value = vcopy;
+      array_idx++;
+      return 0; // 成功插入
+    }
+  }
+  if (i <= KVS_ARRAY_SIZE && i == array_idx) {
+    // 如果没有空位，则插入到最后
+    array_table[array_idx].key = kcopy;
+    array_table[array_idx].value = vcopy;
+    array_idx++;
+  } else {
+    kvstore_free(kcopy);
+    kvstore_free(vcopy);
+    return -1; // 插入失败
+  }
   return 0;
 }
 
@@ -70,6 +92,8 @@ int kvstore_array_delete(char *key) {
 
       kvstore_free(array_table[i].key);
       array_table[i].key = NULL;
+
+      array_idx--;
       return 0; // 删除成功
     }
   }

@@ -17,6 +17,15 @@
 #include <unistd.h>
 // tcp
 
+// 日志打印开关
+
+#define ENABLE_LOG 1
+#ifdef ENABLE_LOG
+#define LOG(fmt, ...) printf("[LOG] " fmt "\n", ##__VA_ARGS__)
+#else
+#define LOG(fmt, ...)
+#endif
+
 #define BUFFER_LENGTH 1024
 
 #define ENABLE_HTTP_RESPONSE 0

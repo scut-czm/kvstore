@@ -45,7 +45,7 @@ int kvstore_parser_protocol(connection_t *item, char **tokens, int count) {
       break;
     }
   }
-  printf("cmd: %d, count: %d\n", cmd, count);
+  LOG("cmd: %d, count: %d\n", cmd, count);
 
   char *msg = item->wbuffer;
   char *key = tokens[1];
@@ -55,7 +55,7 @@ int kvstore_parser_protocol(connection_t *item, char **tokens, int count) {
 
   case KVSTORE_CMD_SET: {
     int res = kvstore_array_set(key, value);
-    printf("set: %d\n", res);
+    LOG("set: %d\n", res);
 
     if (!res) {
       snprintf(msg, BUFFER_LENGTH, "SUCCESS");
@@ -69,15 +69,15 @@ int kvstore_parser_protocol(connection_t *item, char **tokens, int count) {
 
     char *value = kvstore_array_get(key);
     if (value != NULL) {
-      snprintf(msg, BUFFER_LENGTH, "VALUE: %s", value);
+      snprintf(msg, BUFFER_LENGTH, "%s", value);
     } else {
       snprintf(msg, BUFFER_LENGTH, "NOT EXIST");
     }
     break;
-    printf("get: %s\n", value);
+    LOG("get: %s\n", value);
   }
   case KVSTORE_CMD_DEL: {
-    printf("del\n");
+    LOG("del\n");
 
     int res = kvstore_array_delete(key);
     if (res < 0) {
@@ -85,33 +85,33 @@ int kvstore_parser_protocol(connection_t *item, char **tokens, int count) {
     } else if (res == 0) {
       snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
     } else {
-      snprintf(msg, BUFFER_LENGTH, "%s", "NO EXIST");
+      snprintf(msg, BUFFER_LENGTH, "%s", "NOT EXIST");
     }
     break;
   }
   case KVSTORE_CMD_MOD: {
-    printf("mod\n");
+    LOG("mod\n");
     int res = kvstore_array_modify(key, value);
     if (res < 0) {
       snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
     } else if (res == 0) {
       snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
     } else {
-      snprintf(msg, BUFFER_LENGTH, "%s", "NO EXIST");
+      snprintf(msg, BUFFER_LENGTH, "%s", "NOT EXIST");
     }
 
     break;
   }
   default:
-    printf("cmd: %s\n", tokens[0]);
+    LOG("cmd: %s\n", tokens[0]);
     assert(0);
   }
 }
 
 // SET key value
 int kvstore_request(connection_t *item) {
-  printf("kvstore_request called for fd: %d\n", item->fd);
-  printf("recv: %s\n", item->rbuffer);
+  LOG("kvstore_request called for fd: %d\n", item->fd);
+  LOG("recv: %s\n", item->rbuffer);
 
   char *msg = item->rbuffer;
   char *tokens[KVSTORE_MAX_TOKEN];
@@ -119,7 +119,7 @@ int kvstore_request(connection_t *item) {
   int token_count = kvstore_split_token(msg, tokens);
   int idx = 0;
   for (idx = 0; idx < token_count; idx++) {
-    printf("idx: %d, token: %s\n", idx, tokens[idx]);
+    LOG("idx: %d, token: %s\n", idx, tokens[idx]);
   }
 
   kvstore_parser_protocol(item, tokens, token_count);

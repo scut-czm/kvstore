@@ -141,7 +141,7 @@ void server(void *arg) {
     return;
   }
 
-  printf("Successfully listening on port : %d\n", port);
+  LOG("Successfully listening on port : %d\n", port);
 
   struct timeval tv_begin;
   gettimeofday(&tv_begin, NULL);
@@ -162,8 +162,8 @@ void server(void *arg) {
       int time_used = TIME_SUB_MS(tv_begin, tv_cur);
       printf("client fd : %d, time_used: %d\n", cli_fd, time_used);
     }
-    printf("new client coming from %s:%d\n", inet_ntoa(remote.sin_addr),
-           ntohs(remote.sin_port));
+    LOG("new client coming from %s:%d\n", inet_ntoa(remote.sin_addr),
+        ntohs(remote.sin_port));
 
     nty_coroutine *read_co;
     int *arg = (int *)malloc(sizeof(int));
