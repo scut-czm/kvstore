@@ -1,5 +1,5 @@
 CC = gcc
-SRCS = kvstore.c ntyco_entry.c epoll_entry.c kvstore_array.c
+SRCS = kvstore.c ntyco_entry.c epoll_entry.c kvstore_array.c kvstore_rbtree.c
 TESTCASE_SRCS = testcase.c
 TARGET = kvstore
 TESTCASE = testcase

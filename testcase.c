@@ -70,7 +70,7 @@ int recv_msg(int connfd, char *msg, int length) {
 // 结果判断
 void equals(char *pattern, char *result, char *casename) {
   if (strcmp(pattern, result) == 0) {
-    /*  printf("==> PASS --> %s\n", casename); */
+    /* printf("==> PASS --> %s\n", casename); */
   } else {
     printf("==> FAILED --> %s, '%s' != '%s'\n", casename, pattern, result);
   }
@@ -87,6 +87,8 @@ int test_case(int connfd, char *msg, char *pattern, char *casename) {
   recv_msg(connfd, result, sizeof(result) - 1);
   equals(pattern, result, casename);
 }
+
+/*****************************array-testcase****************************/
 
 // array-test
 void array_testcase(int connfd) {
@@ -107,6 +109,50 @@ void array_testcase_10w(int connfd) {
   }
 }
 
+/*****************************rbtree-test****************************/
+
+void rbtree_testcase(int connfd) {
+  test_case(connfd, "RSET Name King", "SUCCESS", "SETCase");
+  test_case(connfd, "RGET Name", "King", "GETCase");
+  test_case(connfd, "RMOD Name Darren", "SUCCESS", "MODCase");
+  test_case(connfd, "RGET Name", "Darren", "GETCase");
+  test_case(connfd, "RDEL Name", "SUCCESS", "DELCase");
+  test_case(connfd, "RGET Name", "NOT EXIST", "GETCase");
+}
+
+void rbtree_testcase_10w(int connfd) {
+  int count = 100000;
+  int i = 0;
+  while (i++ < count) {
+    rbtree_testcase(connfd);
+  }
+}
+
+void rbtree_testcase_5w_node(int connfd) {
+  int count = 50000;
+  int i = 0;
+
+  for (i = 0; i < count; i++) {
+    char cmd[128] = {0};
+    snprintf(cmd, sizeof(cmd), "RSET key%d value%d", i, i);
+    test_case(connfd, cmd, "SUCCESS", "SETCase");
+
+    char result[128] = {0};
+    sprintf(result, "%d", i + 1);
+    test_case(connfd, "RCOUNT", result, "RCOUNTCase");
+  }
+  for (i = 0; i < count; i++) {
+    char cmd[128] = {0};
+    snprintf(cmd, sizeof(cmd), "RDEL key%d", i);
+    test_case(connfd, cmd, "SUCCESS", "DELCase");
+
+    char result[128] = {0};
+    sprintf(result, "%d", count - i - 1);
+    test_case(connfd, "RCOUNT", result, "RCOUNTCase");
+  }
+}
+
+/*****************************main****************************/
 //./testcase -s 192.168.150.130 -p 2048 -m 1
 // array: 0x01,rbtree: 0x02, hash: 0x04 skiptable: 0x08
 int main(int argc, char *argv[]) {
@@ -147,7 +193,20 @@ int main(int argc, char *argv[]) {
 
     int time_used = TIME_SUB_MS(tv_end, tv_begin);
 
-    printf("time_used: %d, qps: %lld\n", time_used,
+    printf("array_testcase_10w-->  time_used: %d, qps: %lld\n", time_used,
            (600000LL * 1000) / time_used);
+  }
+
+  if (mode & 0x2) {
+    struct timeval tv_begin;
+    gettimeofday(&tv_begin, NULL);
+    /*  rbtree_testcase_10w(connfd); */
+    /* rbtree_testcase(connfd); */
+    rbtree_testcase_5w_node(connfd);
+    struct timeval tv_end;
+    gettimeofday(&tv_end, NULL);
+    int time_used = TIME_SUB_MS(tv_end, tv_begin);
+    printf("rbtree_testcase_10w-->  time_used: %d, qps: %lld\n", time_used,
+           (200000LL * 1000) / time_used);
   }
 }
